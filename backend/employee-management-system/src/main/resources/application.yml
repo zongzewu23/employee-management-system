@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: employee-management-system
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/employee_db
+    username: zongzewu
+    password: 20040622Wzz@
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  security:
+    user:
+      name: wu
+      password: 123
+
+server:
+  port: 8080
+
+logging:
+  level:
+    edu.uw.cs.zongzewu: DEBUG
+    org.springframework.security: DEBUG

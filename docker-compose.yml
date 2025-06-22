@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: employee-db
+    environment:
+      POSTGRES_DB: employee_db
+      POSTGRES_USER: zongzewu
+      POSTGRES_PASSWORD: 20040622Wzz@
+    ports:
+      - "5432:5432"
+    volumes:
+    # persist PostgreSQL data
+      - postgres_data:/var/lib/postgresql/data
+  
+  backend:
+    build: ./backend/employee-management-system
+    container_name: employee-backend
+    ports:
+      - "8080:8080"
+    depends_on:  # ensure backend is started after postgre start
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/employee_db
+      SPRING_DATASOURCE_USERNAME: zongzewu
+      SPRING_DATASOURCE_PASSWORD: 20040622Wzz@
+    volumes:
+      - ./backend/employee-management-system:/app
+    working_dir: /app
+
+  frontend:
+    build: ./frontend
+    container_name: employee-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+  
+volumes:
+  postgres_data:
+
