@@ -36,7 +36,7 @@ public class Employee {
     private String phone;
 
     @Column(length = 100)
-    private String posistion;
+    private String position;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal salary;
