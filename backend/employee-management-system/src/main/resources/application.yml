@@ -4,22 +4,22 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/employee_db
-    username: zongzewu
+    username: postgres  # Use default PostgreSQL superuser for development
     password: 20040622Wzz@
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: update  # Automatically update database schema
+    show-sql: true      # Log SQL queries for debugging
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        '[format_sql]': true  # Format SQL queries in logs
 
   security:
     user:
-      name: wu
+      name: wu          # Default Spring Security user for development
       password: 123
 
 server:
@@ -27,5 +27,5 @@ server:
 
 logging:
   level:
-    edu.uw.cs.zongzewu: DEBUG
-    org.springframework.security: DEBUG
+    '[edu.uw.cs.zongzewu]': DEBUG                    # Debug level for application packages
+    '[org.springframework.security]': DEBUG         # Debug level for Spring Security
