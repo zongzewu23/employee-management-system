@@ -1,0 +1,156 @@
+package edu.uw.cs.zongzewu.employee_management_system.service;
+
+
+import edu.uw.cs.zongzewu.employee_management_system.entity.Department;
+import edu.uw.cs.zongzewu.employee_management_system.entity.Employee;
+import edu.uw.cs.zongzewu.employee_management_system.repository.DepartmentRepository;
+import edu.uw.cs.zongzewu.employee_management_system.repository.EmployeeRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class EmployeeService {
+    private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
+
+    /**
+     * Get all employees
+     * @return all employees
+     */
+    @Transactional(readOnly = true)
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
+    }
+
+    /**
+     * Get employee by id
+     */
+    @Transactional(readOnly = true)
+    public Optional<Employee> getEmployeeById(Long id) {
+        return employeeRepository.findById(id);
+    }
+
+    /**
+     * Create new employee
+     * @param employee
+     * @return employee
+     */
+    public Employee createEmployee(Employee employee) {
+        // Verify email uniqueness
+        if (employeeRepository.findByEmail(employee.getEmail()).isPresent()) {
+            throw new RuntimeException("This email is already existed: " + employee.getEmail());
+        }
+
+        // Verify department existence
+        if (employee.getDepartment() != null && employee.getDepartment().getId() != null) {
+            Department department = departmentRepository.findById(employee.getDepartment().getId())
+                    .orElseThrow(() -> new RuntimeException("Department not found: " + employee.getDepartment().getId()));
+            employee.setDepartment(department);
+        }
+
+        // Set the default state
+        if (employee.getStatus() == null) {
+            employee.setStatus(Employee.EmployeeStatus.ACTIVE);
+        }
+
+        return employeeRepository.save(employee);
+    }
+
+    public Employee updateEmployee(Long id, Employee updatedEmployee) {
+        Employee existingEmployee = employeeRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("Employee not found:" + id));
+        Optional<Employee> emailCheck = employeeRepository.findByEmail(updatedEmployee.getEmail());
+        if (emailCheck.isPresent() && !emailCheck.get().getId().equals(id)) {
+            throw new RuntimeException("Email already exists: " + updatedEmployee.getEmail());
+        }
+
+        // Update fields, modifier model
+        existingEmployee.setFirstName(updatedEmployee.getFirstName());
+        existingEmployee.setLastName(updatedEmployee.getLastName());
+        existingEmployee.setEmail(updatedEmployee.getEmail());
+        existingEmployee.setPhone(updatedEmployee.getPhone());
+        existingEmployee.setPosition(updatedEmployee.getPosition());
+        existingEmployee.setSalary(updatedEmployee.getSalary());
+        existingEmployee.setHireData(updatedEmployee.getHireData());
+        existingEmployee.setStatus(updatedEmployee.getStatus());
+
+        if (updatedEmployee.getDepartment() != null && updatedEmployee.getDepartment().getId() != null) {
+            Department department = departmentRepository.findById(updatedEmployee.getDepartment().getId())
+                    .orElseThrow(()-> new RuntimeException("Department not found: " + updatedEmployee.getDepartment().getId()));
+            existingEmployee.setDepartment(department);
+        }
+
+        return  employeeRepository.save(existingEmployee);
+    }
+
+    /**
+     * delete employee with id
+     * @param id
+     */
+    public void deleteEmployee(Long id) {
+        if (!employeeRepository.existsById(id)) {
+            throw new RuntimeException("Employee not found: " + id);
+        }
+        employeeRepository.deleteById(id);
+    }
+
+    /**
+     * get all the employees belongs to the department with the id
+     * @param departmentId
+     * @return List of employee
+     */
+    @Transactional(readOnly = true)
+    public List<Employee> getEmployeesByDepartment(Long departmentId) {
+        return employeeRepository.findByDepartmentId(departmentId);
+    }
+
+    /**
+     * get employees that are under status
+     * @param status
+     * @return List of employees
+     */
+    @Transactional(readOnly = true)
+    public List<Employee> getEmployeesByStatus(Employee.EmployeeStatus status) {
+        return employeeRepository.findByStatus(status);
+    }
+
+    /**
+     * find all the employees that likely have this name
+     * @param name
+     * @return List of employees
+     */
+    @Transactional(readOnly = true)
+    public List<Employee> searchEmployeesByName(String name) {
+        return employeeRepository.findByNameContaining(name);
+    }
+
+    /**
+     * update employee status
+     * @param id
+     * @param status
+     * @return this employee
+     */
+    public Employee updateEmployeeStatus(Long id, Employee.EmployeeStatus status) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found: " + id));
+
+        employee.setStatus(status);
+        return employeeRepository.save(employee);
+    }
+
+    /**
+     * get the number of employees under this department
+     * @param departmentId
+     * @return Number of employees
+     */
+    @Transactional(readOnly = true)
+    public Long getEmployeeCountByDepartment(Long departmentId) {
+        return employeeRepository.countByDepartmentId(departmentId);
+    }
+}
