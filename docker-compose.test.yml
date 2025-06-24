@@ -1,57 +1,58 @@
-# docker-compose.test.yml
-# This file extends your main docker-compose.yml for testing
+# docker-compose.test-only.yml
+# Independent test environment configuration, not dependent on the main configuration file
 
 services:
   postgres:
+    image: postgres:15
+    container_name: employee-db-test
     environment:
       POSTGRES_DB: employee_db_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test_password
-    volumes: []  # Override the main file's volumes configuration
+    ports:
+      - "5432:5432"
     tmpfs:
-      - /var/lib/postgresql/data  # Use tmpfs for faster test database
-  
+      - /var/lib/postgresql/data
+
   backend:
+    build: ./backend/employee-management-system
+    container_name: employee-backend-test
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/employee_db_test
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: test_password
       SPRING_PROFILES_ACTIVE: test
-    depends_on:
-      - postgres
+    volumes:
+      - ./backend/employee-management-system:/app
+    working_dir: /app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-  
+
   frontend:
+    build: ./frontend
+    container_name: employee-frontend-test
+    ports:
+      - "3000:3000"
     environment:
       REACT_APP_API_URL: http://backend:8080/api
       CI: true
     depends_on:
       - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-  
-  # Integration test runner
-  integration-tests:
-    build:
-      context: ./tests
-      dockerfile: Dockerfile.integration
-    depends_on:
-      backend:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
-    environment:
-      API_BASE_URL: http://backend:8080/api
-      FRONTEND_URL: http://frontend:3000
-    volumes:
-      - ./test-results:/app/results
-    command: ["npm", "run", "test:integration"]

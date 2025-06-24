@@ -165,39 +165,39 @@ jobs:
     needs: [build-and-push]
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Download backend artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: backend-jar
-        path: backend/employee-management-system/target/
-    
-    - name: Download frontend artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: frontend-build
-        path: frontend/build/
-    
-    - name: Start test environment
-      run: |
-        docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
-        sleep 30  # Wait for services to be ready
-    
-    - name: Run integration tests
-      run: |
-        # Health check
-        curl -f http://localhost:8080/actuator/health || exit 1
-        echo "✅ Backend health check passed"
-        
-        # Frontend check
-        curl -f http://localhost:3000 || exit 1
-        echo "✅ Frontend health check passed"
-    
-    - name: Cleanup test environment
-      if: always()
-      run: docker compose -f docker-compose.yml -f docker-compose.test.yml down
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download backend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/employee-management-system/target/
+
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/build/
+
+      - name: Start test environment
+        run: |
+          docker compose -f docker-compose.test.yml up -d
+          sleep 30  # Wait for services to be ready
+
+      - name: Run integration tests
+        run: |
+          # Health check
+          curl -f http://localhost:8080/actuator/health || exit 1
+          echo "✅ Backend health check passed"
+          
+          # Frontend check
+          curl -f http://localhost:3000 || exit 1
+          echo "✅ Frontend health check passed"
+
+      - name: Cleanup test environment
+        if: always()
+        run: docker compose -f docker-compose.test.yml down
 
   # Deployment Job (to staging/production)
   deploy:
