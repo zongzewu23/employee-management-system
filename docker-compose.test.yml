@@ -1,0 +1,56 @@
+# docker-compose.test.yml
+# This file extends your main docker-compose.yml for testing
+
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: employee_db_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test_password
+    tmpfs:
+      - /var/lib/postgresql/data  # Use tmpfs for faster test database
+  
+  backend:
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/employee_db_test
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: test_password
+      SPRING_PROFILES_ACTIVE: test
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  frontend:
+    environment:
+      REACT_APP_API_URL: http://backend:8080/api
+      CI: true
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  # Integration test runner
+  integration-tests:
+    build:
+      context: ./tests
+      dockerfile: Dockerfile.integration
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    environment:
+      API_BASE_URL: http://backend:8080/api
+      FRONTEND_URL: http://frontend:3000
+    volumes:
+      - ./test-results:/app/results
+    command: ["npm", "run", "test:integration"]
