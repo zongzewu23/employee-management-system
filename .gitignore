@@ -4,9 +4,6 @@
 *.war
 *.ear
 target/
-.mvn/
-mvnw
-mvnw.cmd
 
 # Spring Boot
 *.log
