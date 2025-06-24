@@ -7,6 +7,7 @@ services:
       POSTGRES_DB: employee_db_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test_password
+    volumes: []  # Override the main file's volumes configuration
     tmpfs:
       - /var/lib/postgresql/data  # Use tmpfs for faster test database
   
