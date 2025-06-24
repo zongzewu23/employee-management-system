@@ -7,6 +7,9 @@ COPY pom.xml .
 COPY .mvn .mvn
 COPY mvnw .
 
+# Set mvnw execution permissions
+RUN chmod +x ./mvnw
+
 # Download dependency, use the Docker cache
 RUN ./mvnw dependency:go-offline
 
