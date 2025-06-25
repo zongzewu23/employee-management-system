@@ -32,6 +32,7 @@ public class EmployeeController {
      * get employee by id
      * GET /api/employees/{id}
      */
+    @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
         Optional<Employee> employee = employeeService.getEmployeeById(id);
         return employee.map(ResponseEntity::ok)

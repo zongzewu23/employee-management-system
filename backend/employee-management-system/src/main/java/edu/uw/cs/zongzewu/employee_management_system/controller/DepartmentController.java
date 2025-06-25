@@ -1,7 +1,6 @@
 package edu.uw.cs.zongzewu.employee_management_system.controller;
 
 import edu.uw.cs.zongzewu.employee_management_system.entity.Department;
-import edu.uw.cs.zongzewu.employee_management_system.entity.Employee;
 import edu.uw.cs.zongzewu.employee_management_system.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,7 @@ public class DepartmentController {
      * get department according to id
      * GET /api/departments/{id}
      */
-    @GetMapping("{/id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Department> getDepartmentById(@PathVariable Long id) {
         Optional<Department> department = departmentService.getDepartmentById(id);
         return department.map(ResponseEntity::ok)
