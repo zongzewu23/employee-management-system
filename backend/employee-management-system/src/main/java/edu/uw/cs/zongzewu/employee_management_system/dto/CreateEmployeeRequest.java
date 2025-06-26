@@ -60,7 +60,7 @@ public class CreateEmployeeRequest {
         employee.setPhone(this.phone);
         employee.setPosition(this.position);
         employee.setSalary(this.salary);
-        employee.setHireData(this.hireDate);
+        employee.setHireDate(this.hireDate);
         employee.setStatus(this.status != null ? this.status : Employee.EmployeeStatus.ACTIVE);
 
         return employee;

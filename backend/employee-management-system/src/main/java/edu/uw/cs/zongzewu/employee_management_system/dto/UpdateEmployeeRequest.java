@@ -65,7 +65,7 @@ public class UpdateEmployeeRequest {
             employee.setSalary(this.salary);
         }
         if (this.hireDate != null) {
-            employee.setHireData(this.hireDate);
+            employee.setHireDate(this.hireDate);
         }
         if (this.status != null) {
             employee.setStatus(this.status);
@@ -107,7 +107,7 @@ public class UpdateEmployeeRequest {
         request.setPhone(employee.getPhone());
         request.setPosition(employee.getPosition());
         request.setSalary(employee.getSalary());
-        request.setHireDate(employee.getHireData());
+        request.setHireDate(employee.getHireDate());
         request.setStatus(employee.getStatus());
         if (employee.getDepartment() != null) {
             request.setDepartmentId(employee.getDepartment().getId());
