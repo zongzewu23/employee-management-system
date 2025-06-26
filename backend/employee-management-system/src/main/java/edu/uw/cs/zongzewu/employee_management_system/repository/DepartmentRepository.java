@@ -23,4 +23,12 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
     @Query("SELECT d FROM Department d WHERE SIZE(d.employees) = 0")
     List<Department> findEmptyDepartments();
 
+    /**
+     * Check if department name exists for departments other than the specified ID
+     * @param name Department name
+     * @param id Department ID to exclude from check
+     * @return true if name exists for other departments
+     */
+    boolean existsByNameAndIdNot(String name, Long id);
+
 }
