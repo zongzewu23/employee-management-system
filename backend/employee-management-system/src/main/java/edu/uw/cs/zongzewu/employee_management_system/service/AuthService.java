@@ -2,7 +2,6 @@ package edu.uw.cs.zongzewu.employee_management_system.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 /**
  * Authentication Service - Will be completed on Day 3
  * Currently only provides a basic framework
