@@ -1,5 +1,6 @@
 package edu.uw.cs.zongzewu.employee_management_system.service;
 
+import edu.uw.cs.zongzewu.employee_management_system.dto.UpdateDepartmentRequest;
 import edu.uw.cs.zongzewu.employee_management_system.entity.Department;
 import edu.uw.cs.zongzewu.employee_management_system.repository.DepartmentRepository;
 import edu.uw.cs.zongzewu.employee_management_system.repository.EmployeeRepository;
@@ -62,6 +63,43 @@ public class DepartmentService {
         existingDepartment.setLocation(updatedDepartment.getLocation());
         existingDepartment.setManagerName(updatedDepartment.getManagerName());
 
+        return departmentRepository.save(existingDepartment);
+    }
+
+    /**
+     * Update department using UpdateDepartmentRequest DTO
+     * @param id Department ID
+     * @param updateRequest UpdateDepartmentRequest with validation
+     * @return Updated Department entity
+     * @throws RuntimeException if department not found
+     */
+    public Department updateDepartment(Long id, UpdateDepartmentRequest updateRequest) {
+        // Find existing department
+        Department existingDepartment = departmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
+
+        // Validate business rules
+        updateRequest.validateBusinessRules();
+
+        // Check if no updates are provided
+        if (!updateRequest.hasUpdates()) {
+            throw new IllegalArgumentException("No updates provided");
+        }
+
+        // Check for name uniqueness if name is being updated
+        if (updateRequest.getName() != null &&
+                !updateRequest.getName().equals(existingDepartment.getName())) {
+            boolean nameExists = departmentRepository.existsByNameAndIdNot(
+                    updateRequest.getName(), id);
+            if (nameExists) {
+                throw new RuntimeException("Department name already exists: " + updateRequest.getName());
+            }
+        }
+
+        // Apply updates to existing department
+        updateRequest.applyToEntity(existingDepartment);
+
+        // Save and return updated department
         return departmentRepository.save(existingDepartment);
     }
 

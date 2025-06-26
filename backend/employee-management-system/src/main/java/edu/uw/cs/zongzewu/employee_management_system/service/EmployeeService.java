@@ -1,6 +1,7 @@
 package edu.uw.cs.zongzewu.employee_management_system.service;
 
 
+import edu.uw.cs.zongzewu.employee_management_system.dto.UpdateEmployeeRequest;
 import edu.uw.cs.zongzewu.employee_management_system.entity.Department;
 import edu.uw.cs.zongzewu.employee_management_system.entity.Employee;
 import edu.uw.cs.zongzewu.employee_management_system.repository.DepartmentRepository;
@@ -62,6 +63,12 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
+    /**
+     * update employee
+     * @param id
+     * @param updatedEmployee
+     * @return updated Employee
+     */
     public Employee updateEmployee(Long id, Employee updatedEmployee) {
         Employee existingEmployee = employeeRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException("Employee not found:" + id));
@@ -87,6 +94,40 @@ public class EmployeeService {
         }
 
         return  employeeRepository.save(existingEmployee);
+    }
+
+    /**
+     * Update employee using UpdateEmployeeRequest DTO
+     * @param id Employee ID
+     * @param updateRequest UpdateEmployeeRequest with validation
+     * @return Updated Employee entity
+     * @throws RuntimeException if employee not found or department not found
+     */
+    public Employee updateEmployee(Long id, UpdateEmployeeRequest updateRequest) {
+        // Find existing employee
+        Employee existingEmployee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
+
+        // Validate business rules
+        updateRequest.validateBusinessRules();
+
+        // Check if no updates are provided
+        if (!updateRequest.hasUpdates()) {
+            throw new IllegalArgumentException("No updates provided");
+        }
+
+        // Handle department association if departmentId is provided
+        if (updateRequest.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(updateRequest.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + updateRequest.getDepartmentId()));
+            existingEmployee.setDepartment(department);
+        }
+
+        // Apply updates to existing employee
+        updateRequest.applyToEntity(existingEmployee);
+
+        // Save and return updated employee
+        return employeeRepository.save(existingEmployee);
     }
 
     /**
