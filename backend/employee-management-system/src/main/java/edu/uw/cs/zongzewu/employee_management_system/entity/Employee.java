@@ -42,7 +42,7 @@ public class Employee {
     private BigDecimal salary;
 
     @Column(name = "hire_date")
-    private LocalDate hireDate;
+    private LocalDate hireDate; // be careful typo
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
