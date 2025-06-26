@@ -46,7 +46,7 @@ public class EmployeeDTO {
         dto.setPhone(employee.getPhone());
         dto.setPosition(employee.getPosition());
         dto.setSalary(employee.getSalary());
-        dto.setHireDate(employee.getHireData());
+        dto.setHireDate(employee.getHireDate());
         dto.setStatus(employee.getStatus());
         dto.setCreatedAt(employee.getCreatedAt());
         dto.setUpdatedAt(employee.getUpdatedAt());

@@ -77,7 +77,7 @@ public class EmployeeService {
         existingEmployee.setPhone(updatedEmployee.getPhone());
         existingEmployee.setPosition(updatedEmployee.getPosition());
         existingEmployee.setSalary(updatedEmployee.getSalary());
-        existingEmployee.setHireData(updatedEmployee.getHireData());
+        existingEmployee.setHireDate(updatedEmployee.getHireDate());
         existingEmployee.setStatus(updatedEmployee.getStatus());
 
         if (updatedEmployee.getDepartment() != null && updatedEmployee.getDepartment().getId() != null) {

@@ -10,12 +10,18 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # Automatically update database schema
+      ddl-auto: create-drop  # recreate table every time restart the application
     show-sql: true      # Log SQL queries for debugging
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         '[format_sql]': true  # Format SQL queries in logs
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
 
   security:
     user:
@@ -27,8 +33,10 @@ server:
 
 logging:
   level:
-    '[edu.uw.cs.zongzewu]': DEBUG                    # Debug level for application packages
-    '[org.springframework.security]': DEBUG         # Debug level for Spring Security
+    '[edu.uw.cs.zongzewu]': DEBUG
+    '[org.springframework.security]': DEBUG
+    '[org.springframework.jdbc.datasource.init]': DEBUG
+    '[org.springframework.boot.sql.init]': DEBUG
 
 # CORS config
 app:
