@@ -1,6 +1,10 @@
 package edu.uw.cs.zongzewu.employee_management_system.service;
 
+import edu.uw.cs.zongzewu.employee_management_system.repository.UserRepository;
+import edu.uw.cs.zongzewu.employee_management_system.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 /**
  * Authentication Service - Will be completed on Day 3
@@ -11,6 +15,11 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     // TODO: Day 3 - Add dependencies like UserRepository, PasswordEncoder, JwtUtil, etc.
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService userDetailsService;
 
     /**
      * User Login - To be implemented on Day 3
