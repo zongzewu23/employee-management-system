@@ -1,6 +1,5 @@
 package edu.uw.cs.zongzewu.employee_management_system.config;
 
-
 import edu.uw.cs.zongzewu.employee_management_system.dto.ApiResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -10,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,11 +26,29 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * Handle Spring Security authorization exceptions (403 Forbidden)
+     * This handler must come BEFORE the RuntimeException handler
+     */
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthorizationDenied(
+            AuthorizationDeniedException ex, WebRequest request) {
+        log.warn("Access denied: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error("Access denied. You don't have permission to perform this operation."));
+    }
+
     /**
      * Handling general runtime exceptions
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex, WebRequest request) {
+        // Don't handle AuthorizationDeniedException here - let the specific handler above handle it
+        if (ex instanceof AuthorizationDeniedException) {
+            throw ex; // Re-throw to be handled by the specific handler
+        }
+
         log.error("Runtime exception occurred: {}", ex.getMessage(), ex);
 
         if(isBusinessException(ex.getMessage())) {
@@ -47,9 +65,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleEntityNotFoundException(EntityNotFoundException ex, WebRequest request) {
-       log.warn("Entity not found: {}", ex.getMessage());
-       return ResponseEntity.status((HttpStatus.NOT_FOUND))
-               .body(ApiResponse.notFound(ex.getMessage()));
+        log.warn("Entity not found: {}", ex.getMessage());
+        return ResponseEntity.status((HttpStatus.NOT_FOUND))
+                .body(ApiResponse.notFound(ex.getMessage()));
     }
 
     /**
@@ -85,7 +103,6 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
         return ResponseEntity.badRequest().body(ApiResponse.validationError(errors));
     }
-
 
     /**
      * handle DB integrity violation exception
@@ -184,7 +201,6 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.internalError());
     }
 
-
     /**
      * Determine whether it is a business logic exception
      * These exceptions should return 400 instead of 500
@@ -201,6 +217,5 @@ public class GlobalExceptionHandler {
                 lowerMessage.contains("cannot delete") ||
                 lowerMessage.contains("must be") ||
                 lowerMessage.contains("required");
-
     }
 }
