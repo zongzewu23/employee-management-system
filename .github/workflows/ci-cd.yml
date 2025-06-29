@@ -40,38 +40,14 @@ jobs:
           mvn clean test -Dtest="**/*Test" -DfailIfNoTests=false
           echo "✅ Unit tests completed"
 
-      - name: Start test database
-        run: |
-          echo "🐘 Starting PostgreSQL for integration tests..."
-          docker run -d \
-            --name postgres-test \
-            -e POSTGRES_DB=employee_db_test \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=test_password \
-            -p 5432:5432 \
-            postgres:15
-          
-          echo "Waiting for PostgreSQL to start..."
-          timeout 60 bash -c 'until docker exec postgres-test pg_isready -U postgres; do sleep 2; done'
-          echo "✅ PostgreSQL is ready"
-
       - name: Run integration tests
         working-directory: ./backend/employee-management-system
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/employee_db_test
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: test_password
           SPRING_PROFILES_ACTIVE: test
         run: |
-          echo "🔗 Running Integration Tests..."
+          echo "🔗 Running Integration Tests with H2 database..."
           mvn test -Dtest="**/*IntegrationTest" -DfailIfNoTests=false
           echo "✅ Integration tests completed"
-
-      - name: Cleanup test database
-        if: always()
-        run: |
-          echo "🧹 Cleaning up test database..."
-          docker rm -f postgres-test || true
 
       - name: Generate test report
         if: always()
