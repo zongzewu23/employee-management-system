@@ -78,7 +78,7 @@ public class EmployeeDTO {
     public static class DepartmentSummaryDTO {
         private Long id;
         private String name;
-        private String Location;
+        private String location;
         private String managerName;
 
         public static DepartmentSummaryDTO fromEntity(Department department) {

@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,7 @@ public class DepartmentController {
      * @return ApiResponse<List<DepartmentDTO>>
      */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<DepartmentDTO>>> getAllDepartments(
             @RequestParam(value = "includeEmployees", defaultValue = "false") boolean includeEmployees) {
         try {
@@ -58,6 +60,7 @@ public class DepartmentController {
      * @return ApiResponse<DepartmentDTO>
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<DepartmentDTO>> getDepartmentById(
             @PathVariable Long id,
             @RequestParam(value = "includeEmployees", defaultValue = "true") boolean includeEmployees) {
@@ -86,6 +89,7 @@ public class DepartmentController {
      * @return ApiResponse<DepartmentDTO>
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<DepartmentDTO>> createDepartment(
             @Valid @RequestBody CreateDepartmentRequest createRequest,
             BindingResult bindingResult) {
@@ -127,6 +131,7 @@ public class DepartmentController {
      * @return ApiResponse<DepartmentDTO>
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<DepartmentDTO>> updateDepartment(
             @PathVariable Long id,
             @Valid @RequestBody UpdateDepartmentRequest updateRequest,
@@ -164,6 +169,7 @@ public class DepartmentController {
      * @return ApiResponse<Void>
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteDepartment(@PathVariable Long id) {
         try {
             departmentService.deleteDepartment(id);
@@ -189,6 +195,7 @@ public class DepartmentController {
      * @return ApiResponse<List<DepartmentDTO>>
      */
     @GetMapping("/search/name")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<DepartmentDTO>>> searchDepartmentsByName(@RequestParam String name) {
         try {
             if (name == null || name.trim().isEmpty()) {
@@ -216,6 +223,7 @@ public class DepartmentController {
      * @return ApiResponse<List<DepartmentDTO>>
      */
     @GetMapping("/search/location")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<DepartmentDTO>>> searchDepartmentsByLocation(@RequestParam String location) {
         try {
             if (location == null || location.trim().isEmpty()) {
@@ -243,6 +251,7 @@ public class DepartmentController {
      * @return ApiResponse<List<DepartmentDTO>>
      */
     @GetMapping("/search/manager")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<DepartmentDTO>>> searchDepartmentsByManager(@RequestParam String manager) {
         try {
             if (manager == null || manager.trim().isEmpty()) {
@@ -269,6 +278,7 @@ public class DepartmentController {
      * @return ApiResponse<List<DepartmentDTO>>
      */
     @GetMapping("/with-employees")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<DepartmentDTO>>> getDepartmentsWithEmployees() {
         try {
             List<Department> departments = departmentService.getDepartmentsWithEmployees();
@@ -290,6 +300,7 @@ public class DepartmentController {
      * @return ApiResponse<List<DepartmentDTO>>
      */
     @GetMapping("/empty")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<DepartmentDTO>>> getEmptyDepartments() {
         try {
             List<Department> departments = departmentService.getEmptyDepartments();
@@ -312,6 +323,7 @@ public class DepartmentController {
      * @return ApiResponse<Long>
      */
     @GetMapping("/{id}/employee-count")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Long>> getEmployeeCount(@PathVariable Long id) {
         try {
             Long count = departmentService.getEmployeeCount(id);
@@ -333,6 +345,7 @@ public class DepartmentController {
      * @return ApiResponse<Boolean>
      */
     @GetMapping("/{id}/exists")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Boolean>> departmentExists(@PathVariable Long id) {
         try {
             boolean exists = departmentService.departmentExists(id);

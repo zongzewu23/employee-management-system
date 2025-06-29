@@ -39,28 +39,36 @@ public class EmployeeService {
 
     /**
      * Create new employee
-     * @param employee
-     * @return employee
+     * @param employee Employee entity
+     * @param departmentId Department ID (can be null)
+     * @return Created employee
      */
-    public Employee createEmployee(Employee employee) {
+    public Employee createEmployee(Employee employee, Long departmentId) {
         // Verify email uniqueness
         if (employeeRepository.findByEmail(employee.getEmail()).isPresent()) {
-            throw new RuntimeException("This email is already existed: " + employee.getEmail());
+            throw new RuntimeException("This email already exists: " + employee.getEmail());
         }
 
-        // Verify department existence
-        if (employee.getDepartment() != null && employee.getDepartment().getId() != null) {
-            Department department = departmentRepository.findById(employee.getDepartment().getId())
-                    .orElseThrow(() -> new RuntimeException("Department not found: " + employee.getDepartment().getId()));
+        // Handle department association if departmentId is provided
+        if (departmentId != null) {
+            Department department = departmentRepository.findById(departmentId)
+                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + departmentId));
             employee.setDepartment(department);
         }
 
-        // Set the default state
+        // Set the default status if not provided
         if (employee.getStatus() == null) {
             employee.setStatus(Employee.EmployeeStatus.ACTIVE);
         }
 
         return employeeRepository.save(employee);
+    }
+
+    /**
+     * Overloaded method for backward compatibility
+     */
+    public Employee createEmployee(Employee employee) {
+        return createEmployee(employee, null);
     }
 
     /**
@@ -114,6 +122,15 @@ public class EmployeeService {
         // Check if no updates are provided
         if (!updateRequest.hasUpdates()) {
             throw new IllegalArgumentException("No updates provided");
+        }
+
+        // Check email uniqueness if email is being updated
+        if (updateRequest.getEmail() != null &&
+                !updateRequest.getEmail().equals(existingEmployee.getEmail())) {
+            Optional<Employee> emailCheck = employeeRepository.findByEmail(updateRequest.getEmail());
+            if (emailCheck.isPresent() && !emailCheck.get().getId().equals(id)) {
+                throw new RuntimeException("Email already exists: " + updateRequest.getEmail());
+            }
         }
 
         // Handle department association if departmentId is provided

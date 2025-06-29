@@ -33,7 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
     public ObjectMapper objectMapper() {
         return Jackson2ObjectMapperBuilder.json()
                 .modules(new JavaTimeModule())
-                .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
                 .simpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 .build();
     }

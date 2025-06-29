@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class EmployeeController {
      * @return List of EmployeeDTO
      */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getAllEmployees() {
         List<Employee> employees = employeeService.getAllEmployees();
         List<EmployeeDTO> employeeDTOs = employees.stream()
@@ -46,6 +48,7 @@ public class EmployeeController {
      * @return EmployeeDTO
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> getEmployeeById(@PathVariable Long id) {
         Optional<Employee> employee = employeeService.getEmployeeById(id);
         if (employee.isPresent()) {
@@ -65,24 +68,28 @@ public class EmployeeController {
      * @return Created EmployeeDTO
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> createEmployee(
             @Valid @RequestBody CreateEmployeeRequest createRequest,
             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             String errorMessage = bindingResult.getFieldErrors().stream()
-                    .map(error->error.getField() + ": " + error.getDefaultMessage())
+                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
                     .collect(Collectors.joining(", "));
             return ResponseEntity.badRequest().body(ApiResponse.validationError(errorMessage));
         }
+
         try {
             createRequest.validateBusinessRules();
             Employee employee = createRequest.toEntity();
 
-            Employee createdEmployee = employeeService.createEmployee(employee);
+            // Pass the departmentId to the service
+            Employee createdEmployee = employeeService.createEmployee(employee, createRequest.getDepartmentId());
 
             EmployeeDTO responseDTO = EmployeeDTO.fromEntity(createdEmployee);
-            return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Employee created successfully", responseDTO));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.success("Employee created successfully", responseDTO));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.validationError(e.getMessage()));
@@ -100,6 +107,7 @@ public class EmployeeController {
      * PUT /api/employees/{id}
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> updateEmployee(
             @PathVariable Long id,
             @Valid @RequestBody UpdateEmployeeRequest updateRequest,
@@ -136,6 +144,7 @@ public class EmployeeController {
      * @return ApiResponse<Void>
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteEmployee(@PathVariable Long id) {
         try {
             employeeService.deleteEmployee(id);
@@ -154,6 +163,7 @@ public class EmployeeController {
      * GET /api/employees/department/{departmentId}
      */
     @GetMapping("/department/{departmentId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public  ResponseEntity<ApiResponse<List<EmployeeDTO>>> getEmployeesByDepartment(@PathVariable Long departmentId) {
         try {
             List<Employee> employees = employeeService.getEmployeesByDepartment(departmentId);
@@ -176,6 +186,7 @@ public class EmployeeController {
      * GET /api/employees/status/{status}
      */
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getEmployeesByStatus(@PathVariable Employee.EmployeeStatus status) {
         try {
             List<Employee> employees = employeeService.getEmployeesByStatus(status);
@@ -199,6 +210,7 @@ public class EmployeeController {
      * @return ApiResponse<List<EmployeeDTO>>
      */
     @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<ApiResponse<List<EmployeeDTO>>> searchEmployees(@RequestParam String name) {
         try {
             if (name == null || name.trim().isEmpty()) {
@@ -227,6 +239,7 @@ public class EmployeeController {
      * @return ApiResponse<EmployeeDTO>
      */
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeDTO>> updateEmployeeStatus(
             @PathVariable Long id,
             @RequestParam Employee.EmployeeStatus status) {
@@ -257,6 +270,7 @@ public class EmployeeController {
      * @return ApiResponse<Long>
      */
     @GetMapping("/count/department/{departmentId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<ApiResponse<Long>> getEmployeeCountByDepartment(@PathVariable Long departmentId) {
         try {
             Long count = employeeService.getEmployeeCountByDepartment(departmentId);

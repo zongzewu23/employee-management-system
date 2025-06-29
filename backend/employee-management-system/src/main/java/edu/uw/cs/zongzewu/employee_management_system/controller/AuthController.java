@@ -1,6 +1,8 @@
 package edu.uw.cs.zongzewu.employee_management_system.controller;
 
+import edu.uw.cs.zongzewu.employee_management_system.dto.*;
 import edu.uw.cs.zongzewu.employee_management_system.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,125 +13,141 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
     private final AuthService authService;
 
     /**
-     * user login
+     * User login
      * POST /api/auth/login
-     * Body: { "email": "user@example.com", "password": "password123" }
+     * Body: { "username": "admin", "password": "password123" }
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            String email = loginRequest.get("email");
-            String password = loginRequest.get("password");
-
-            String token = authService.login(email, password);
-
-            return ResponseEntity.ok(
-                    Map.of(
-                            "token", token,
-                            "message", "Login successful"
-                    ));
+            AuthResponse authResponse = authService.login(loginRequest);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Login successful",
+                    "data", authResponse
+            ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of(
-                    "error", "Invalid credentials",
+                    "success", false,
                     "message", e.getMessage()
             ));
         }
     }
 
     /**
-     * user register
+     * User registration
      * POST /api/auth/register
-     * Body: { "email": "user@example.com", "password": "password123", "firstName": "John", "lastName": "Doe" }
+     * Body: { "username": "newuser", "password": "password123", "email": "user@example.com" }
      */
-    public ResponseEntity<?> register(@RequestBody Map<String, String> registerRequest) {
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            String email = registerRequest.get("email");
-            String password = registerRequest.get("password");
-            String firstName = registerRequest.get("firstName");
-            String lastName = registerRequest.get("lastName");
-
-            authService.register(email, password, firstName, lastName);
-
+            authService.register(registerRequest);
             return ResponseEntity.ok(Map.of(
+                    "success", true,
                     "message", "Registration successful"
             ));
-
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of(
-               "error", "Registration failed",
-               "message", e.getMessage()
+                    "success", false,
+                    "message", e.getMessage()
             ));
         }
     }
 
     /**
-     * verify Token
+     * Validate token
      * POST /api/auth/validate
      * Body: {"token": "jwt_token_here"}
      */
     @PostMapping("/validate")
-    public ResponseEntity<?> validateToken(@RequestBody Map<String, String> tokenRequest) {
+    public ResponseEntity<?> validateToken(@Valid @RequestBody TokenValidationRequest tokenRequest) {
         try {
-            String token = tokenRequest.get("token");
+            boolean isValid = authService.validateToken(tokenRequest.getToken());
 
-            boolean isValid = authService.validateToken(token);
             if (isValid) {
-                String userEmail = authService.getUserEmailFromToken(token);
+                String username = authService.getUsernameFromToken(tokenRequest.getToken());
                 return ResponseEntity.ok(Map.of(
+                        "success", true,
                         "valid", true,
-                        "email", userEmail
+                        "username", username
                 ));
             } else {
                 return ResponseEntity.ok(Map.of(
+                        "success", true,
                         "valid", false
                 ));
             }
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of(
-                    "error", "Token validation failed",
-                    "message", e.getMessage()
+                    "success", false,
+                    "message", e.getMessage(),
+                    "valid", false
             ));
         }
     }
 
     /**
-     * refresh Token
+     * Refresh token
      * POST /api/auth/refresh
-     * Body: { "token": "old_jwt_token_here" }
+     * Body: { "refreshToken": "refresh_jwt_token_here" }
      */
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> tokenRequest) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest tokenRefreshRequest) {
         try {
-            String oldToken = tokenRequest.get("token");
-
-            String newToken = authService.refreshToken(oldToken);
-
+            AuthResponse authResponse = authService.refreshToken(tokenRefreshRequest.getRefreshToken());
             return ResponseEntity.ok(Map.of(
-                    "token", newToken,
-                    "message", "Token refreshed successfully"
+                    "success", true,
+                    "message", "Token refreshed successfully",
+                    "data", authResponse
             ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of(
-                    "error", "Token refresh failed",
+                    "success", false,
                     "message", e.getMessage()
             ));
         }
     }
 
     /**
-     * userLogout
+     * User logout
      * POST /api/auth/logout
      * Header: Authorization: Bearer {token}
      */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-
-        // return successful message for, now, might need to do more in the future
+        // For JWT, logout is handled on the client side by removing the token
+        // Server-side token blacklisting can be implemented later if needed
         return ResponseEntity.ok(Map.of(
+                "success", true,
                 "message", "Logout successful"
         ));
+    }
+
+    /**
+     * Get current user info
+     * GET /api/auth/me
+     * Header: Authorization: Bearer {token}
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.substring(7); // Remove "Bearer " prefix
+            String username = authService.getUsernameFromToken(token);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "username", username
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
     }
 }
