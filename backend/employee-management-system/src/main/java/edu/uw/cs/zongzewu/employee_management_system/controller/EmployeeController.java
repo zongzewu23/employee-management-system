@@ -90,6 +90,7 @@ public class EmployeeController {
             EmployeeDTO responseDTO = EmployeeDTO.fromEntity(createdEmployee);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success("Employee created successfully", responseDTO));
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.validationError(e.getMessage()));
