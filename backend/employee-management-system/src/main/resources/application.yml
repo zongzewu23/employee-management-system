@@ -45,7 +45,10 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
-  show-actuator: true
+    try-it-out-enabled: true
+  show-actuator: false
+  packages-to-scan: edu.uw.cs.zongzewu.employee_management_system.controller
+  paths-to-match: /api/**
 
 jwt:
   secret: mySecretKey123456789012345678901234567890123456789012345678901234567890EXTRA
