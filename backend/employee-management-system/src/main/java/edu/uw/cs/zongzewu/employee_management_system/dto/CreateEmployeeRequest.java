@@ -31,7 +31,7 @@ public class CreateEmployeeRequest {
     private String email;
 
     @Size(max = 20, message = "Phone must be less than 20 characters")
-    @Pattern(regexp = "^[+]?[0-9\\\\s\\\\-\\\\(\\\\)]+$", message = "Phone number format is invalid")
+    @Pattern(regexp = "^[+]?[\\d\\s()-]+$", message = "Phone number format is invalid")
     private String phone;
 
     @Size(max = 100, message = "Position must be less than 100 characters")
