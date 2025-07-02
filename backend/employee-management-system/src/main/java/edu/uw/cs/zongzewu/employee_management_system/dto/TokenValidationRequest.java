@@ -1,5 +1,6 @@
 package edu.uw.cs.zongzewu.employee_management_system.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,6 +41,7 @@ public class TokenValidationRequest {
     /**
      * Get token without Bearer prefix
      */
+    @JsonIgnore
     public String getCleanToken() {
         if (token != null && token.startsWith("Bearer ")) {
             return token.substring(7);

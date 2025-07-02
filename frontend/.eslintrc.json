@@ -4,7 +4,46 @@
     "react-app/jest"
   ],
   "rules": {
-    "no-unused-vars": "warn",
-    "no-console": "warn"
-  }
+    "no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_",
+        "ignoreRestSiblings": true,
+        "args": "after-used"
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_",
+        "ignoreRestSiblings": true,
+        "args": "after-used"
+      }
+    ],
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error"]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "varsIgnorePattern": "^(_|ACTIVE|INACTIVE|TERMINATED|ADMIN|USER)$",
+            "argsIgnorePattern": "^_",
+            "ignoreRestSiblings": true,
+            "args": "after-used"
+          }
+        ],
+        "no-unused-vars": "off"
+      }
+    }
+  ]
 }
