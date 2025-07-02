@@ -5,7 +5,6 @@ import {
     Button,
     Space,
     Tag,
-    Modal,
     Input,
     Select,
     Tooltip,
@@ -19,7 +18,6 @@ import {
     SearchOutlined,
     UserOutlined,
     PlusOutlined,
-    ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import type {ColumnsType} from 'antd/es/table';
 import {EmployeeDTO, EmployeeStatus} from '../../types/api';
@@ -91,18 +89,6 @@ const EmployeeList = ({
             year: 'numeric',
             month: 'short',
             day: 'numeric',
-        });
-    };
-
-    const handleDelete = (id: number, name: string) => {
-        Modal.confirm({
-            title: 'Delete Employee',
-            icon: <ExclamationCircleOutlined />,
-            content: `Are you sure you want to delete employee "${name}"? This action cannot be undone.`,
-            okText: 'Yes, Delete',
-            okType: 'danger',
-            cancelText: 'Cancel',
-            onOk: () => onDelete(id),
         });
     };
 

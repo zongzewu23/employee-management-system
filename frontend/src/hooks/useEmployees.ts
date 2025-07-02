@@ -53,7 +53,7 @@ export const useEmployees = () => {
     },[]);
 
     // create employee
-    const createEmployee = useCallback(async (employeeData: CreateEmployeeRequest):Promise<boolean | null> => {
+    const createEmployee = useCallback(async (employeeData: CreateEmployeeRequest):Promise<boolean> => {
         setLoading(true);
         setError(null);
         try {

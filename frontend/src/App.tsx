@@ -6,103 +6,99 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/common/PrivateRoute';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import { UserRole } from './types/api';
+import EmployeePage from './pages/EmployeePage';
 import './App.css';
+import {UserRole} from "./types/api";
 
-
-// Define your Ant Design theme here, if not in a separate file
+// Ant Design theme configuration
 const theme = {
-  token: {
-    colorPrimary: '#00b96b',
-  },
+    token: {
+        colorPrimary: '#1890ff',
+        borderRadius: 6,
+    },
 };
 
-// --- CHANGE IS HERE ---
-const App = (): React.JSX.Element => { // Explicitly define props (none here) and return type
-// ---
-  return (
-      <ConfigProvider theme={theme}>
-        <AuthProvider>
-          <Router>
-            <div className="App">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/login" element={<LoginPage />} />
+const App: React.FC = () => {
+    return (
+        <ConfigProvider theme={theme}>
+            <AuthProvider>
+                <Router>
+                    <div className="App">
+                        <Routes>
+                            {/* Public Routes */}
+                            <Route path="/login" element={<LoginPage />} />
 
-                {/* Protected Routes */}
-                <Route
-                    path="/dashboard"
-                    element={
-                      <PrivateRoute>
-                        <DashboardPage />
-                      </PrivateRoute>
-                    }
-                />
+                            {/* Protected Routes */}
+                            <Route
+                                path="/dashboard"
+                                element={
+                                    <PrivateRoute>
+                                        <DashboardPage />
+                                    </PrivateRoute>
+                                }
+                            />
 
-                {/* Admin Only Routes */}
-                <Route
-                    path="/admin/*"
-                    element={
-                      <PrivateRoute requiredRole={UserRole.ADMIN}>
-                        <div style={{ padding: 24 }}>
-                          <h2>Admin Panel</h2>
-                          <p>This is an admin-only section.</p>
-                        </div>
-                      </PrivateRoute>
-                    }
-                />
+                            {/* Admin Only Routes */}
+                            <Route
+                                path="/admin/*"
+                                element={
+                                    <PrivateRoute requiredRole={UserRole.ADMIN}>
+                                        <div style={{ padding: 24 }}>
+                                            <h2>Admin Panel</h2>
+                                            <p>This is an admin-only section.</p>
+                                        </div>
+                                    </PrivateRoute>
+                                }
+                            />
 
-                {/* Employee Management Routes */}
-                <Route
-                    path="/employees"
-                    element={
-                      <PrivateRoute>
-                        <div style={{ padding: 24 }}>
-                          <h2>Employee Management</h2>
-                          <p>Employee list and management will be implemented here.</p>
-                        </div>
-                      </PrivateRoute>
-                    }
-                />
+                            {/* Employee Management Routes */}
+                            <Route
+                                path="/employees"
+                                element={
+                                    <PrivateRoute>
+                                        <EmployeePage />
+                                    </PrivateRoute>
+                                }
+                            />
 
-                {/* Department Management Routes */}
-                <Route
-                    path="/departments"
-                    element={
-                      <PrivateRoute>
-                        <div style={{ padding: 24 }}>
-                          <h2>Department Management</h2>
-                          <p>Department list and management will be implemented here.</p>
-                        </div>
-                      </PrivateRoute>
-                    }
-                />
+                            {/* Department Management Routes */}
+                            <Route
+                                path="/departments"
+                                element={
+                                    <PrivateRoute>
+                                        <div style={{ padding: 24 }}>
+                                            <h2>Department Management</h2>
+                                            <p>Department list and management will be implemented here.</p>
+                                        </div>
+                                    </PrivateRoute>
+                                }
+                            />
 
-                {/* Default Redirect */}
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                            {/* Default Redirect */}
+                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-                {/* 404 Not Found */}
-                <Route
-                    path="*"
-                    element={
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '100vh',
-                        flexDirection: 'column'
-                      }}>
-                        <h1>404 - Page Not Found</h1>
-                        <p>The page you are looking for does not exist.</p>
-                      </div>
-                    }
-                />
-              </Routes>
-            </div>
-          </Router>
-        </AuthProvider>
-      </ConfigProvider>
-  );
+                            {/* 404 Not Found */}
+                            <Route
+                                path="*"
+                                element={
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        height: '100vh',
+                                        flexDirection: 'column'
+                                    }}>
+                                        <h1>404 - Page Not Found</h1>
+                                        <p>The page you are looking for does not exist.</p>
+                                    </div>
+                                }
+                            />
+                        </Routes>
+                    </div>
+                </Router>
+            </AuthProvider>
+        </ConfigProvider>
+    );
 };
 
 export default App;

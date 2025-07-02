@@ -10,15 +10,29 @@ import {
     DashboardOutlined,
     PlusOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import {useAuth} from "../context/AuthContext";
 
 const { Header, Sider, Content } = Layout;
 
 const DashboardPage: React.FC = () => {
     const { user, logout, isAdmin } = useAuth();
+    const navigate = useNavigate();
 
     const handleLogout = () => {
         logout();
+    };
+
+    const navigateToEmployees = () => {
+        navigate('/employees');
+    };
+
+    const navigateToDepartments = () => {
+        navigate('/departments');
+    };
+
+    const navigateToAdmin = () => {
+        navigate('/admin');
     };
 
     // User dropdown menu
@@ -55,11 +69,13 @@ const DashboardPage: React.FC = () => {
             key: 'employees',
             icon: <TeamOutlined />,
             label: 'Employees',
+            onClick: navigateToEmployees,
         },
         {
             key: 'departments',
             icon: <ApartmentOutlined />,
             label: 'Departments',
+            onClick: navigateToDepartments,
         },
     ];
 
@@ -69,6 +85,7 @@ const DashboardPage: React.FC = () => {
             key: 'admin',
             icon: <SettingOutlined />,
             label: 'Admin Panel',
+            onClick: navigateToAdmin,
         });
     }
 
@@ -105,6 +122,12 @@ const DashboardPage: React.FC = () => {
                     mode="inline"
                     defaultSelectedKeys={['dashboard']}
                     items={menuItems}
+                    onClick={({ key }) => {
+                        const item = menuItems.find(item => item.key === key);
+                        if (item && item.onClick) {
+                            item.onClick();
+                        }
+                    }}
                 />
             </Sider>
 
@@ -199,6 +222,7 @@ const DashboardPage: React.FC = () => {
                                         icon={<PlusOutlined />}
                                         block
                                         size="large"
+                                        onClick={navigateToEmployees}
                                     >
                                         Add Employee
                                     </Button>
@@ -208,6 +232,7 @@ const DashboardPage: React.FC = () => {
                                         icon={<ApartmentOutlined />}
                                         block
                                         size="large"
+                                        onClick={navigateToDepartments}
                                     >
                                         Add Department
                                     </Button>
@@ -217,6 +242,7 @@ const DashboardPage: React.FC = () => {
                                         icon={<TeamOutlined />}
                                         block
                                         size="large"
+                                        onClick={navigateToEmployees}
                                     >
                                         View All Employees
                                     </Button>
@@ -227,6 +253,7 @@ const DashboardPage: React.FC = () => {
                                         block
                                         size="large"
                                         disabled={!isAdmin()}
+                                        onClick={isAdmin() ? navigateToAdmin : undefined}
                                     >
                                         System Settings
                                     </Button>

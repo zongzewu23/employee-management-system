@@ -168,6 +168,8 @@ export const AuthProvider = ({ children }: AuthProviderProps): React.JSX.Element
                     payload: { user, token: accessToken, refreshToken }
                 });
 
+                localStorage.setItem('token', accessToken);
+
                 // Get full user info after successful login
                 await getCurrentUser();
 
@@ -346,7 +348,7 @@ export const withAuth = <P extends object>(
     const { requireRole, fallback = <div>Access denied</div> } = options;
 
     return (props: P): React.JSX.Element => {
-        const { user, isAuthenticated, hasRole } = useAuth();
+        const { isAuthenticated, hasRole } = useAuth();
 
         if (!isAuthenticated) {
             return <div>Please log in to access this page</div>;
