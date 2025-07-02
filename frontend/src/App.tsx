@@ -11,6 +11,7 @@ import EmployeePage from './pages/EmployeePage';
 import './App.css';
 import { UserRole } from "./types/api";
 import DepartmentPage from "./pages/DepartmentPage";
+import AdminPage from "./pages/AdminPage";
 
 // Ant Design theme configuration
 const theme = {
@@ -47,10 +48,7 @@ const App: React.FC = () => {
                                     path="admin/*"
                                     element={
                                         <PrivateRoute requiredRole={UserRole.ADMIN}>
-                                            <div style={{ padding: 24, background: '#fff', borderRadius: 8 }}>
-                                                <h2>Admin Panel</h2>
-                                                <p>This is an admin-only section.</p>
-                                            </div>
+                                            <AdminPage />
                                         </PrivateRoute>
                                     }
                                 />
