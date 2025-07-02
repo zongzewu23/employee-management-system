@@ -1,7 +1,6 @@
 // src/pages/EmployeePage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-    Layout,
     Card,
     Row,
     Col,
@@ -30,8 +29,6 @@ import {
     EmployeeStatus,
 } from '../types/api';
 
-const { Content } = Layout;
-
 const EmployeePage = (): React.JSX.Element => {
     // state management
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -53,16 +50,10 @@ const EmployeePage = (): React.JSX.Element => {
     } = useEmployees();
 
     const {
-        departments,
+        departmentsSummary: departments,
         loading: departmentLoading,
         error: departmentError,
-        fetchDepartments,
-    } = useDepartments();
-
-    // fetch department data when mounted
-    useEffect(() => {
-        fetchDepartments();
-    }, [fetchDepartments]);
+    } = useDepartments(true, false); // fetchOnMount=true, includeEmployees=false
 
     // Open the Add Employee modal box
     const handleAddEmployee = () => {
@@ -120,8 +111,8 @@ const EmployeePage = (): React.JSX.Element => {
     const isLoading = employeeLoading || departmentLoading;
     const hasError = employeeError || departmentError
 
-    return (<Layout style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
-        <Content style={{ padding: '24px' }}>
+    return (
+        <div style={{ padding: 24, background: '#fff', borderRadius: 8 }}>
             {/* bread crumb navigation */}
             <Breadcrumb style={{ marginBottom: 24 }}>
                 <Breadcrumb.Item>
@@ -202,6 +193,7 @@ const EmployeePage = (): React.JSX.Element => {
                     </div>
                 }
                 bordered={false}
+                style={{ marginBottom: 0 }}
             >
                 {isLoading ? (
                     <div style={{ textAlign: 'center', padding: '50px 0' }}>
@@ -240,36 +232,8 @@ const EmployeePage = (): React.JSX.Element => {
                     mode={formMode}
                 />
             </Modal>
-        </Content>
-    </Layout>
+        </div>
     );
 }
 
-export  default EmployeePage;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export default EmployeePage;

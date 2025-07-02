@@ -69,6 +69,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
                 onValuesChange={handleFormChange}
                 autoComplete="off"
                 size="large"
+                initialValues={{
+                    username: 'admin',
+                    password: 'admin123'
+                }}
             >
                 <Form.Item
                     name="username"
