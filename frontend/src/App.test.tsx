@@ -1,6 +1,6 @@
 // App.test.tsx
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 const SimpleComponent: React.FC = () => {
   return (
@@ -13,19 +13,18 @@ const SimpleComponent: React.FC = () => {
 
 describe('Simple Component Tests', () => {
   test('renders simple component', () => {
-    const { container } = render(<SimpleComponent />);
-    expect(container).toBeInTheDocument();
+    render(<SimpleComponent />);
+    expect(screen.getByText('Test Component')).toBeInTheDocument();
   });
 
   test('contains expected text', () => {
-    const { getByText } = render(<SimpleComponent />);
-    expect(getByText('Test Component')).toBeInTheDocument();
-    expect(getByText('This is a simple test')).toBeInTheDocument();
+    render(<SimpleComponent />);
+    expect(screen.getByText('Test Component')).toBeInTheDocument();
+    expect(screen.getByText('This is a simple test')).toBeInTheDocument();
   });
 
-  test('has correct class name', () => {
-    const { container } = render(<SimpleComponent />);
-    const component = container.querySelector('.test-component');
-    expect(component).toBeInTheDocument();
+  test('has correct heading', () => {
+    render(<SimpleComponent />);
+    expect(screen.getByRole('heading', { name: 'Test Component' })).toBeInTheDocument();
   });
 });
