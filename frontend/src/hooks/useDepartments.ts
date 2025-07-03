@@ -118,7 +118,6 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
                 };
                 setDepartmentsSummary(prev => [...prev, newDepartmentSummary]);
                 setAllDepartmentsSummary(prev => [...prev, newDepartmentSummary]);
-
             }
 
             message.success('Department created successfully');

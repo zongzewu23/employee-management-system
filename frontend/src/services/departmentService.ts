@@ -117,6 +117,7 @@ export class DepartmentService {
                 }
 
 
+
 //            const {data: responseBody} = await api.delete<ApiResponseVoid>(`/departments/${id}`);
 //            if (!responseBody.success) {
 //                throw new Error(responseBody.message || 'Failed to delete department');
