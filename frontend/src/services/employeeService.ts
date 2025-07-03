@@ -90,6 +90,10 @@ export class EmployeeService {
                         (responseBody.message as string) : 'Failed to delete employee';
                     throw new Error(message);
                 }
+
+//            if (!responseBody.success) {
+//                throw new Error(responseBody.message || 'Failed to delete employee');
+
             }
         } catch (error: any) {
             throw new Error(error.response?.data?.message || error.message || 'Network error');
@@ -102,6 +106,7 @@ export class EmployeeService {
     static async updateEmployeeStatus(id: number, status: EmployeeStatus): Promise<EmployeeDTO> {
         try {
             const response: ApiResponseEmployeeDTO = await api.patch(`/employees/${id}/status?status=${status}`);
+
             if (response.success && response.data) {
                 return response.data;
             }

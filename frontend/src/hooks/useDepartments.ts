@@ -21,6 +21,7 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
     const [departmentsSummary, setDepartmentsSummary] = useState<DepartmentSummaryDTO[]>([]);
     const [allDepartments, setAllDepartments] = useState<DepartmentDTO[]>([]); // Store all departments
     const [allDepartmentsSummary, setAllDepartmentsSummary] = useState<DepartmentSummaryDTO[]>([]); // Store all departments summary
+
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -319,7 +320,9 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         updateDepartment,
         deleteDepartment,
         searchDepartmentsByName,
+      
         resetSearch,
+
         getEmptyDepartments,
         refreshDepartments,
         getDepartmentsForSelection,

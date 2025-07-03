@@ -115,6 +115,13 @@ export class DepartmentService {
                         (responseBody.message as string) : 'Failed to delete department';
                     throw new Error(message);
                 }
+
+
+
+//            const {data: responseBody} = await api.delete<ApiResponseVoid>(`/departments/${id}`);
+//            if (!responseBody.success) {
+//                throw new Error(responseBody.message || 'Failed to delete department');
+
             }
         } catch (error: any) {
             throw new Error(error.response?.data?.message || error.message || 'Network error');
