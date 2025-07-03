@@ -103,15 +103,12 @@ export class DepartmentService {
     }
 
     /**
-     * Delete a department by ID - 修复版本
+     * Delete a department by ID
      * @param id - The ID of the department to delete
      */
     static async deleteDepartment(id: number): Promise<void> {
         try {
             const { data: responseBody } = await api.delete<ApiResponseVoid>(`/departments/${id}`);
-
-            console.log('Delete department response:', responseBody);
-
             if (responseBody && typeof responseBody === 'object') {
                 if ('success' in responseBody && !responseBody.success) {
                     const message = 'message' in responseBody ?
@@ -119,37 +116,8 @@ export class DepartmentService {
                     throw new Error(message);
                 }
             }
-
-            console.log(`Department ${id} deleted successfully`);
-
         } catch (error: any) {
-            console.error('Delete department error:', error);
-
-            if (error.response) {
-                const status = error.response.status;
-                const responseData = error.response.data;
-
-                let message = 'An error occurred';
-                if (responseData && typeof responseData === 'object' && 'message' in responseData) {
-                    message = responseData.message as string;
-                } else if (error.message) {
-                    message = error.message;
-                }
-
-                if (status === 404) {
-                    throw new Error(`Department with ID ${id} not found`);
-                } else if (status === 400) {
-                    throw new Error(message || 'Cannot delete department. It may have employees assigned to it.');
-                } else if (status === 403) {
-                    throw new Error('You do not have permission to delete this department');
-                } else {
-                    throw new Error(`Server error (${status}): ${message}`);
-                }
-            } else if (error.request) {
-                throw new Error('Network error: Unable to connect to server');
-            } else {
-                throw new Error(error.message || 'An unexpected error occurred');
-            }
+            throw new Error(error.response?.data?.message || error.message || 'Network error');
         }
     }
 

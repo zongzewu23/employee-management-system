@@ -151,33 +151,11 @@ public class EmployeeService {
      * delete employee with id
      * @param id
      */
-    @Transactional
     public void deleteEmployee(Long id) {
-        Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found: " + id));
-
-        try {
-            if (employee.getDepartment() != null) {
-                Department department = employee.getDepartment();
-                if (department.getEmployees() != null) {
-                    department.getEmployees().remove(employee);
-                }
-                employee.setDepartment(null);
-                employeeRepository.save(employee);
-            }
-
-            employeeRepository.deleteById(id);
-
-            employeeRepository.flush();
-
-            if (employeeRepository.existsById(id)) {
-                throw new RuntimeException("Failed to delete employee - record still exists");
-            }
-
-
-        } catch (Exception e) {
-            throw new RuntimeException("Delete operation failed: " + e.getMessage(), e);
+        if (!employeeRepository.existsById(id)) {
+            throw new RuntimeException("Employee not found: " + id);
         }
+        employeeRepository.deleteById(id);
     }
 
     /**

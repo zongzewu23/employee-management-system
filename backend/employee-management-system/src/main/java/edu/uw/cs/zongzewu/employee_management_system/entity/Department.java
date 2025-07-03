@@ -8,7 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,12 +34,8 @@ public class Department {
     private String managerName;
 
     // this line explain all the thing
-    @OneToMany(mappedBy = "department",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-            fetch = FetchType.LAZY,
-            orphanRemoval = false)
-    private List<Employee> employees = new ArrayList<>();
-
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Employee> employees;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
