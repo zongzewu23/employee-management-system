@@ -77,17 +77,51 @@ export class EmployeeService {
     }
 
     /**
-     * delete employee by id
-     * @param id
+     * 删除员工 - 修复版本
+     * @param id 员工ID
      */
     static async deleteEmployee(id: number): Promise<void> {
         try {
             const { data: responseBody } = await api.delete<ApiResponseVoid>(`/employees/${id}`);
-            if (!responseBody.success) {
-                throw new Error(responseBody.message || 'Failed to delete employee');
+
+            console.log('Delete response:', responseBody);
+
+            if (responseBody && typeof responseBody === 'object') {
+                if ('success' in responseBody && !responseBody.success) {
+                    const message = 'message' in responseBody ?
+                        (responseBody.message as string) : 'Failed to delete employee';
+                    throw new Error(message);
+                }
             }
+
+            console.log(`Employee ${id} deleted successfully`);
+
         } catch (error: any) {
-            throw new Error(error.response?.data?.message || error.message || 'Network error');
+            console.error('Delete employee error:', error);
+
+            if (error.response) {
+                const status = error.response.status;
+                const responseData = error.response.data;
+
+                let message = 'An error occurred';
+                if (responseData && typeof responseData === 'object' && 'message' in responseData) {
+                    message = responseData.message as string;
+                } else if (error.message) {
+                    message = error.message;
+                }
+
+                if (status === 404) {
+                    throw new Error(`Employee with ID ${id} not found`);
+                } else if (status === 403) {
+                    throw new Error('You do not have permission to delete this employee');
+                } else {
+                    throw new Error(`Server error (${status}): ${message}`);
+                }
+            } else if (error.request) {
+                throw new Error('Network error: Unable to connect to server');
+            } else {
+                throw new Error(error.message || 'An unexpected error occurred');
+            }
         }
     }
 

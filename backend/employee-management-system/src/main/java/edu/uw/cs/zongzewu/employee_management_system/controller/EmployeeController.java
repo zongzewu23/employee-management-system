@@ -149,13 +149,21 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<Void>> deleteEmployee(@PathVariable Long id) {
         try {
             employeeService.deleteEmployee(id);
+
             return ResponseEntity.ok(ApiResponse.success("Employee deleted successfully"));
+
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.notFound("Employee with ID " + id));
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && errorMessage.contains("not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.notFound("Employee with ID " + id));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ApiResponse.error("Failed to delete employee", errorMessage));
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Failed to delete employee", e.getMessage()));
+                    .body(ApiResponse.error("Internal server error", e.getMessage()));
         }
     }
 
