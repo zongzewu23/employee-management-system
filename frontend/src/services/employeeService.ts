@@ -101,7 +101,7 @@ export class EmployeeService {
      */
     static async updateEmployeeStatus(id: number, status: EmployeeStatus): Promise<EmployeeDTO> {
         try {
-            const response: ApiResponseEmployeeDTO = await api.put(`/employees/${id}/status?status=${status}`);
+            const response: ApiResponseEmployeeDTO = await api.patch(`/employees/${id}/status?status=${status}`);
             if (response.success && response.data) {
                 return response.data;
             }
