@@ -47,6 +47,7 @@ const DepartmentPage = (): React.JSX.Element => {
         updateDepartment,
         deleteDepartment,
         searchDepartmentsByName,
+        resetSearch,
         getDepartmentById,
         clearError,
     } = useDepartments(true, true); // fetchOnMount=true, includeEmployees=true
@@ -94,10 +95,13 @@ const DepartmentPage = (): React.JSX.Element => {
         await deleteDepartment(id);
     };
 
-    // Handle search
+    // Handle search - FIXED VERSION
     const handleSearch = async (searchTerm: string) => {
-        if (searchTerm.trim()) {
-            await searchDepartmentsByName(searchTerm);
+        if (!searchTerm.trim()) {
+            // If search term is empty, reset to show all departments
+            resetSearch();
+        } else {
+            await searchDepartmentsByName(searchTerm); // This now updates the departments state directly
         }
     };
 

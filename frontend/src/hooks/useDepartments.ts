@@ -19,6 +19,9 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
     // State definitions
     const [departments, setDepartments] = useState<DepartmentDTO[]>([]);
     const [departmentsSummary, setDepartmentsSummary] = useState<DepartmentSummaryDTO[]>([]);
+    const [allDepartments, setAllDepartments] = useState<DepartmentDTO[]>([]); // Store all departments
+    const [allDepartmentsSummary, setAllDepartmentsSummary] = useState<DepartmentSummaryDTO[]>([]); // Store all departments summary
+
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -35,6 +38,7 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         try {
             const data = await DepartmentService.getAllDepartmentsWithEmployees();
             setDepartments(data);
+            setAllDepartments(data); // Store complete list
             return data;
         } catch (err: any) {
             const errorMessage = err.message || 'Failed to fetch departments with employees';
@@ -54,6 +58,7 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         try {
             const data = await DepartmentService.getAllDepartmentsSummary();
             setDepartmentsSummary(data);
+            setAllDepartmentsSummary(data); // Store complete list
             return data;
         } catch (err: any) {
             const errorMessage = err.message || 'Failed to fetch departments';
@@ -100,9 +105,10 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         try {
             const newDepartment = await DepartmentService.createDepartment(departmentData);
 
-            // Update the appropriate state based on current mode
+            // Update both current and all state based on mode
             if (includeEmployees) {
                 setDepartments(prev => [...prev, newDepartment]);
+                setAllDepartments(prev => [...prev, newDepartment]);
             } else {
                 const newDepartmentSummary: DepartmentSummaryDTO = {
                     id: newDepartment.id,
@@ -111,6 +117,8 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
                     managerName: newDepartment.managerName,
                 };
                 setDepartmentsSummary(prev => [...prev, newDepartmentSummary]);
+                setAllDepartmentsSummary(prev => [...prev, newDepartmentSummary]);
+
             }
 
             message.success('Department created successfully');
@@ -133,9 +141,12 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         try {
             const updatedDepartment = await DepartmentService.updateDepartment(id, departmentData);
 
-            // Update the appropriate state based on current mode
+            // Update both current and all state based on mode
             if (includeEmployees) {
                 setDepartments(prev =>
+                    prev.map(dept => dept.id === id ? updatedDepartment : dept)
+                );
+                setAllDepartments(prev =>
                     prev.map(dept => dept.id === id ? updatedDepartment : dept)
                 );
             } else {
@@ -146,6 +157,9 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
                     managerName: updatedDepartment.managerName,
                 };
                 setDepartmentsSummary(prev =>
+                    prev.map(dept => dept.id === id ? updatedDepartmentSummary : dept)
+                );
+                setAllDepartmentsSummary(prev =>
                     prev.map(dept => dept.id === id ? updatedDepartmentSummary : dept)
                 );
             }
@@ -170,11 +184,13 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         try {
             await DepartmentService.deleteDepartment(id);
 
-            // Update the appropriate state based on current mode
+            // Update both current and all state based on mode
             if (includeEmployees) {
                 setDepartments(prev => prev.filter(dept => dept.id !== id));
+                setAllDepartments(prev => prev.filter(dept => dept.id !== id));
             } else {
                 setDepartmentsSummary(prev => prev.filter(dept => dept.id !== id));
+                setAllDepartmentsSummary(prev => prev.filter(dept => dept.id !== id));
             }
 
             message.success('Department deleted successfully');
@@ -189,10 +205,16 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         }
     }, [includeEmployees]);
 
-    // Search departments (by name)
-    const searchDepartmentsByName = useCallback(async (name: string): Promise<DepartmentDTO[] | DepartmentSummaryDTO[]> => {
+    // Search departments (by name) - FIXED VERSION
+    const searchDepartmentsByName = useCallback(async (name: string): Promise<void> => {
         if (!name.trim()) {
-            return includeEmployees ? departments : departmentsSummary;
+            // If search is empty, restore all departments
+            if (includeEmployees) {
+                setDepartments(allDepartments);
+            } else {
+                setDepartmentsSummary(allDepartmentsSummary);
+            }
+            return;
         }
 
         setLoading(true);
@@ -200,16 +222,30 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
 
         try {
             const data = await DepartmentService.searchDepartmentsByName(name);
-            return data;
+
+            // Update the displayed departments with search results
+            if (includeEmployees) {
+                setDepartments(data as DepartmentDTO[]);
+            } else {
+                setDepartmentsSummary(data as DepartmentSummaryDTO[]);
+            }
         } catch (err: any) {
             const errorMessage = err.message || 'Failed to search departments';
             setError(errorMessage);
             message.error(errorMessage);
-            return [];
         } finally {
             setLoading(false);
         }
-    }, [departments, departmentsSummary, includeEmployees]);
+    }, [includeEmployees, allDepartments, allDepartmentsSummary]);
+
+    // Reset search - restore all departments
+    const resetSearch = useCallback(() => {
+        if (includeEmployees) {
+            setDepartments(allDepartments);
+        } else {
+            setDepartmentsSummary(allDepartmentsSummary);
+        }
+    }, [includeEmployees, allDepartments, allDepartmentsSummary]);
 
     // Get list of empty departments
     const getEmptyDepartments = useCallback(async (): Promise<DepartmentDTO[]> => {
@@ -246,14 +282,14 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         }
     }, []);
 
-    // Computed statistics
+    // Computed statistics - use all departments for accurate counts
     const statistics = {
-        total: includeEmployees ? departments.length : departmentsSummary.length,
-        empty: includeEmployees ? departments.filter(dept => dept.empty).length : 0,
-        withEmployees: includeEmployees ? departments.filter(dept => !dept.empty).length : 0,
-        totalEmployees: includeEmployees ? departments.reduce((sum, dept) => sum + dept.employeeCount, 0) : 0,
-        averageEmployeesPerDept: includeEmployees && departments.length > 0
-            ? Math.round(departments.reduce((sum, dept) => sum + dept.employeeCount, 0) / departments.length * 100) / 100
+        total: includeEmployees ? allDepartments.length : allDepartmentsSummary.length,
+        empty: includeEmployees ? allDepartments.filter(dept => dept.empty).length : 0,
+        withEmployees: includeEmployees ? allDepartments.filter(dept => !dept.empty).length : 0,
+        totalEmployees: includeEmployees ? allDepartments.reduce((sum, dept) => sum + dept.employeeCount, 0) : 0,
+        averageEmployeesPerDept: includeEmployees && allDepartments.length > 0
+            ? Math.round(allDepartments.reduce((sum, dept) => sum + dept.employeeCount, 0) / allDepartments.length * 100) / 100
             : 0,
     };
 
@@ -264,10 +300,12 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
     }, [fetchOnMount, fetchDepartments]);
 
     return {
-        // Data - return the appropriate data based on mode
+        // Data - return the appropriate data based on mode (filtered by search)
         departments: includeEmployees ? departments : departmentsSummary,
         departmentsDetailed: departments,
         departmentsSummary,
+        allDepartments, // Complete list for reference
+        allDepartmentsSummary, // Complete summary list for reference
         statistics,
 
         // State
@@ -283,6 +321,9 @@ export const useDepartments = (fetchOnMount: boolean = false, includeEmployees: 
         updateDepartment,
         deleteDepartment,
         searchDepartmentsByName,
+      
+        resetSearch,
+
         getEmptyDepartments,
         refreshDepartments,
         getDepartmentsForSelection,

@@ -77,8 +77,8 @@ export class EmployeeService {
     }
 
     /**
-     * delete employee by id
-     * @param id
+     * delete employee
+     * @param id employee Id
      */
     static async deleteEmployee(id: number): Promise<void> {
         try {

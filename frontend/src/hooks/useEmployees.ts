@@ -10,6 +10,7 @@ import {CreateEmployeeRequest, EmployeeDTO, EmployeeStatus, UpdateEmployeeReques
  */
 export const useEmployees = () => {
     const [employees, setEmployees] = useState<EmployeeDTO[]>([]);
+    const [allEmployees, setAllEmployees] = useState<EmployeeDTO[]>([]); // Store all employees
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +27,7 @@ export const useEmployees = () => {
         try {
             const data = await EmployeeService.getAllEmployees();
             setEmployees(data);
+            setAllEmployees(data); // Store complete list
         } catch (err: any) {
             const errorMessage = err.message || 'Failed to fetch employees';
             setError(errorMessage);
@@ -57,10 +59,11 @@ export const useEmployees = () => {
         setLoading(true);
         setError(null);
         try {
-           const newEmployee =  await  EmployeeService.createEmployee(employeeData);
-           setEmployees(prev => [...prev, newEmployee]);
-           message.success('Employee created successfully');
-           return true;
+            const newEmployee =  await  EmployeeService.createEmployee(employeeData);
+            setEmployees(prev => [...prev, newEmployee]);
+            setAllEmployees(prev => [...prev, newEmployee]); // Update both lists
+            message.success('Employee created successfully');
+            return true;
         } catch (err: any) {
             const errorMessage = err.message || 'Failed to create employee';
             setError(errorMessage);
@@ -79,6 +82,9 @@ export const useEmployees = () => {
         try {
             const updatedEmployee = await EmployeeService.updateEmployee(id, employeeData);
             setEmployees(prev =>
+                prev.map(emp => emp.id === id ? updatedEmployee : emp)
+            );
+            setAllEmployees(prev =>
                 prev.map(emp => emp.id === id ? updatedEmployee : emp)
             );
             message.success('Employee updated successfully');
@@ -101,6 +107,7 @@ export const useEmployees = () => {
         try {
             await EmployeeService.deleteEmployee(id);
             setEmployees(prev => prev.filter(emp => emp.id !== id));
+            setAllEmployees(prev => prev.filter(emp => emp.id !== id));
             message.success('Employee deleted successfully');
             return true;
         } catch (err: any) {
@@ -121,6 +128,9 @@ export const useEmployees = () => {
         try {
             const updatedEmployee = await EmployeeService.updateEmployeeStatus(id, status);
             setEmployees(prev =>
+                prev.map(emp => emp.id === id ? updatedEmployee : emp)
+            );
+            setAllEmployees(prev =>
                 prev.map(emp => emp.id === id ? updatedEmployee : emp)
             );
             message.success('Employee status updated successfully');
@@ -171,10 +181,12 @@ export const useEmployees = () => {
         }
     }, []);
 
-    // Search employees
-    const searchEmployees = useCallback(async (name: string): Promise<EmployeeDTO[]> => {
+    // Search employees - FIXED VERSION
+    const searchEmployees = useCallback(async (name: string): Promise<void> => {
         if (!name.trim()) {
-            return employees;
+            // If search is empty, restore all employees
+            setEmployees(allEmployees);
+            return;
         }
 
         setLoading(true);
@@ -182,33 +194,37 @@ export const useEmployees = () => {
 
         try {
             const data = await EmployeeService.searchEmployees(name);
-            return data;
+            setEmployees(data); // Update displayed employees with search results
         } catch (err: any) {
             const errorMessage = err.message || 'Failed to search employees';
             setError(errorMessage);
             message.error(errorMessage);
-            return [];
         } finally {
             setLoading(false);
         }
-    }, [employees]);
+    }, [allEmployees]);
+
+    // Reset search - restore all employees
+    const resetSearch = useCallback(() => {
+        setEmployees(allEmployees);
+    }, [allEmployees]);
 
     // Automatically fetch employee list when component mounts
     useEffect(() => {
         fetchEmployees();
     }, [fetchEmployees]);
 
-
     const statistics = {
-        total: employees.length,
-        active: employees.filter(emp => emp.status === EmployeeStatus.ACTIVE).length,
-        inactive: employees.filter(emp => emp.status === EmployeeStatus.INACTIVE).length,
-        terminated: employees.filter(emp => emp.status === EmployeeStatus.TERMINATED).length,
+        total: allEmployees.length, // Use allEmployees for accurate total count
+        active: allEmployees.filter(emp => emp.status === EmployeeStatus.ACTIVE).length,
+        inactive: allEmployees.filter(emp => emp.status === EmployeeStatus.INACTIVE).length,
+        terminated: allEmployees.filter(emp => emp.status === EmployeeStatus.TERMINATED).length,
     }
 
     return {
         // data
-        employees,
+        employees, // Currently displayed employees (filtered by search)
+        allEmployees, // All employees (for statistics)
         statistics,
 
         // state
@@ -225,6 +241,7 @@ export const useEmployees = () => {
         updateEmployeeStatus,
         deleteEmployee,
         searchEmployees,
+        resetSearch,
         clearError,
     };
 };
