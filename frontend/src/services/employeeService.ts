@@ -90,6 +90,8 @@ export class EmployeeService {
                         (responseBody.message as string) : 'Failed to delete employee';
                     throw new Error(message);
                 }
+//            if (!responseBody.success) {
+//                throw new Error(responseBody.message || 'Failed to delete employee');
             }
         } catch (error: any) {
             throw new Error(error.response?.data?.message || error.message || 'Network error');
