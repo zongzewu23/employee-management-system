@@ -108,14 +108,24 @@ export class DepartmentService {
      */
     static async deleteDepartment(id: number): Promise<void> {
         try {
-            const {data: responseBody} = await api.delete<ApiResponseVoid>(`/departments/${id}`);
-            if (!responseBody.success) {
-                throw new Error(responseBody.message || 'Failed to delete department');
+            const { data: responseBody } = await api.delete<ApiResponseVoid>(`/departments/${id}`);
+            if (responseBody && typeof responseBody === 'object') {
+                if ('success' in responseBody && !responseBody.success) {
+                    const message = 'message' in responseBody ?
+                        (responseBody.message as string) : 'Failed to delete department';
+                    throw new Error(message);
+                }
+
+//            const {data: responseBody} = await api.delete<ApiResponseVoid>(`/departments/${id}`);
+//            if (!responseBody.success) {
+//                throw new Error(responseBody.message || 'Failed to delete department');
+
             }
         } catch (error: any) {
             throw new Error(error.response?.data?.message || error.message || 'Network error');
         }
     }
+
 
     /**
      * Search departments by name
