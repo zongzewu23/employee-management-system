@@ -46,6 +46,7 @@ const EmployeePage = (): React.JSX.Element => {
         deleteEmployee,
         updateEmployeeStatus,
         searchEmployees,
+        resetSearch,
         clearError: clearEmployeeError,
     } = useEmployees();
 
@@ -99,8 +100,11 @@ const EmployeePage = (): React.JSX.Element => {
     };
 
     const handleSearch = async (searchTerm: string) => {
-        if (searchTerm.trim()) {
-            await searchEmployees(searchTerm);
+        if (!searchTerm.trim()) {
+            // If search term is empty, reset to show all employees
+            resetSearch();
+        } else {
+            await searchEmployees(searchTerm); // This now updates the employees state directly
         }
     };
 
