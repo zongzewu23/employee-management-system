@@ -2,25 +2,22 @@ FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
-# Copy the maven config file
-COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
+# Install Maven
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 
-# Set mvnw execution permissions
+# Copy all files
+COPY . .
+
+# Make mvnw executable
 RUN chmod +x ./mvnw
 
-# Download dependency, use the Docker cache
-RUN ./mvnw dependency:go-offline
+# Build the application
+RUN ./mvnw clean package -DskipTests -B
 
-COPY src ./src
+# Verify JAR was created
+RUN ls -la target/ && echo "JAR files created:" && ls -la target/*.jar
 
-# Build the app
-RUN ./mvnw clean package -DskipTests
-
-# Verify the JAR file was created
-RUN ls -la target/
-
-# Run the app with correct JAR name
 EXPOSE 8080
+
+# Run the application
 CMD ["java", "-jar", "target/employee-management-system-0.0.1-SNAPSHOT.jar"]
