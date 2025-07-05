@@ -1,0 +1,31 @@
+# Development Dockerfile for Spring Boot backend
+# This runs the application using Maven's development server for hot reload
+
+FROM openjdk:17-jdk-slim
+
+# Install Maven for development
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy Maven configuration files first for better caching
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+
+# Set mvnw execution permissions
+RUN chmod +x ./mvnw
+
+# Download dependencies for caching
+RUN ./mvnw dependency:go-offline -B
+
+# Copy source code
+COPY src ./src
+
+# Expose port for Spring Boot
+EXPOSE 8080
+
+# Run the application using Maven's development server
+# This allows for hot reload and development features
+CMD ["./mvnw", "spring-boot:run", "-Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'"] 

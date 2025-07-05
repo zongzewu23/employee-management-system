@@ -11,12 +11,12 @@ services:
     volumes:
     # Persist PostgreSQL data
       - postgres_data:/var/lib/postgresql/data
-  
   backend:
     build: ./backend/employee-management-system
     container_name: employee-backend
-    ports:
-      - "8080:8080"
+    # Remove external port exposure - only nginx will access backend
+    expose:
+      - "8080"
     depends_on:  # Ensure backend is started after postgres start
       - postgres
     environment:
@@ -27,15 +27,14 @@ services:
       - ./backend/employee-management-system:/app
     working_dir: /app
 
+  # Updated frontend service with nginx
   frontend:
     build: ./frontend
     container_name: employee-frontend
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    working_dir: /app
+      - "80:80"  # Expose nginx on port 80
+    depends_on:
+      - backend
   
 volumes:
   postgres_data:

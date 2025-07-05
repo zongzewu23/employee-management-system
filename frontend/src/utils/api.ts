@@ -1,8 +1,19 @@
 import axios from 'axios';
 
+// Environment-aware API base URL configuration
+const getBaseURL = () => {
+  // Check if we're in development mode with React development server
+  if (process.env.NODE_ENV === 'development' && window.location.port === '3000') {
+    // Development mode: React app on port 3000, backend on port 8080
+    return 'http://localhost:8080/api';
+  }
+  // Production mode: nginx proxy setup
+  return '/api';
+};
+
 // create an instance of axios
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: getBaseURL(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

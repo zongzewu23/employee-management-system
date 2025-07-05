@@ -1,0 +1,88 @@
+# Development-specific Spring Boot configuration
+# This configuration is used when SPRING_PROFILES_ACTIVE=dev
+
+spring:
+  application:
+    name: employee-management-system
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/employee_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:your_password_here}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Recreate tables on startup (development only)
+    show-sql: true           # Show SQL queries in console for debugging
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        '[format_sql]': true  # Format SQL queries for better readability
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always           # Always run initialization scripts
+      continue-on-error: false
+
+  # Development-specific security configuration
+  security:
+    user:
+      name: wu              # Default user for development
+      password: 123
+
+  # Development hot reload support
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+server:
+  port: 8080
+
+# Enhanced logging for development
+logging:
+  level:
+    '[edu.uw.cs.zongzewu]': DEBUG
+    '[org.springframework.security]': DEBUG
+    '[org.springframework.jdbc.datasource.init]': DEBUG
+    '[org.springframework.boot.sql.init]': DEBUG
+    '[org.springframework.web]': DEBUG
+    '[org.hibernate.SQL]': DEBUG
+    '[org.hibernate.type.descriptor.sql.BasicBinder]': TRACE
+  pattern:
+    console: '%clr(%d{HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}'
+
+# Swagger/OpenAPI configuration for development
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    try-it-out-enabled: true
+  show-actuator: false
+  packages-to-scan: edu.uw.cs.zongzewu.employee_management_system.controller
+  paths-to-match: /api/**
+
+# JWT configuration
+jwt:
+  secret: mySecretKey123456789012345678901234567890123456789012345678901234567890EXTRA
+
+# CORS configuration for development
+app:
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000}
+
+# Management endpoints for development monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env
+  endpoint:
+    health:
+      show-details: always 

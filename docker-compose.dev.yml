@@ -1,0 +1,63 @@
+# Development version of docker-compose with hot reload support
+# Use this for development with live reload: docker-compose -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: employee-db-dev
+    environment:
+      POSTGRES_DB: employee_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+  backend:
+    build:
+      context: ./backend/employee-management-system
+      dockerfile: Dockerfile.dev
+    container_name: employee-backend-dev
+    ports:
+      - "8080:8080"  # Expose backend port for direct access during development
+      - "5005:5005"  # Expose debug port for remote debugging
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/employee_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_PROFILES_ACTIVE: dev
+    volumes:
+      - ./backend/employee-management-system:/app
+      - /app/target  # Exclude target directory from volume mount
+    working_dir: /app
+
+  # Development frontend with hot reload
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: employee-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  # Production-like frontend with nginx (for testing nginx configuration)
+  frontend-nginx:
+    build: ./frontend
+    container_name: employee-frontend-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    profiles:
+      - nginx-test
+
+volumes:
+  postgres_data_dev: 
