@@ -3,9 +3,9 @@ spring:
     name: employee-management-system
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/employee_db
-    username: postgres  # Use default PostgreSQL superuser for development
-    password: 20040622Wzz@
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/employee_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password123}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -51,9 +51,9 @@ springdoc:
   paths-to-match: /api/**
 
 jwt:
-  secret: mySecretKey123456789012345678901234567890123456789012345678901234567890EXTRA
+  secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890123456789012345678901234567890EXTRA}
 
 # CORS config
 app:
   cors:
-    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000}
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://localhost}
