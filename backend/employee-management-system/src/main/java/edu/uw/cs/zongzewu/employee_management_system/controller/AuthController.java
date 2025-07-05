@@ -219,4 +219,17 @@ public class AuthController {
             ));
         }
     }
+
+    @GetMapping("/health")
+    @Operation(
+            summary = "Health check",
+            description = "Simple health check endpoint for container health monitoring"
+    )
+    public ResponseEntity<?> health() {
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Service is healthy",
+                "timestamp", System.currentTimeMillis()
+        ));
+    }
 }
